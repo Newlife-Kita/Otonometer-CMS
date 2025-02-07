@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "rising-dominion-403607",
+  "private_key_id": "af05324c55e29efb095ee1dd9cb66b05f76c625f",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDPhjXXtgKyDc00\nAO2HfXHdKnJzNId9BPW3lDA+VoLR1kxIq5zlHhpaDZVuszBN6qm22JEAtJM20jwR\notrUu8KGT9qIOYuQsvx6ueZ3zUhU3H86e1eXMKsxUHT4E/KKxUl/qXkDC653j0yY\n7FNCPkNnLT5/P1K1bx+AGMO7CMh5iGsa7ENtW9+qaC8DMB/9lritgG4U6VTX7mcQ\n0APpZs51AhRM8k+RPn4bmMA0s6eKf7kaepaPhcXvJKI0PFnc3i9mLJQAgtsyBXIC\nv8ES2HC96XKrIjuP55XKqY3x3zM0T0WucyGZzph67db5stdczQlbF2WsMEKW8zZK\nFdqnj/8TAgMBAAECggEAS87et1yNUobZKcCXBJIuOJkrcutC/UgFDNlM4FDQ/B95\nAWjzaP0cqj3hEy3RHP12ns0w9x1/05xsBhNENkcakd702SOQWL0RnzFuv9/VJu7f\naTkqb5f/SYX3HLKIvOnB5ik+A/9N7e4CkLBv37iH/dZYyLoUmCOuUah6Q8Y7Ga2z\n78ZhTPwedPPF01jVBBHWuGqDoBQFX/j8NAcwAxvO5KyJHRgfPdinT/O6EYnB8cZw\no4WJ57yq/RtdKo2ETClbo4ODUYXWew0LPaCyWvD6pYvfI3ESRoh5NXymq2iD6fcf\nO8Z4h38bFXDQMivQi7/yTD4dTgqqYR036jEDP4wuOQKBgQDlHVUfXWDVooIfAl40\n9oAYKhLx8vh4BEkUub2c0mNq8HJvVzlfXcev68o/lWM8yXaPWwC2DL+8XmXa3RID\nBAg3dlDoxrLIi60zCufyUtsBF4cfB65qy+9l7tND0ASK03wfNU2ZXjUhr842IMYR\nZEVnNxw6OYpCjFDeL3wxEo8KGQKBgQDn4ExjsDKFd37dcy6Ml4npkmEr14Un9QKP\nFSOQl6CZjPYb0Ydh7F3EAXZF1s7oIvRWyxpfJa2Rp4+J5J49JODxHFhtjXQBKunB\nbwpe2CnnG8YJ4mEnUKFVmclsjC9jE3F4qX5eKS3UvORcI3Ypi4Sv14KDQ45WRg95\nGqC0XDEQCwKBgEfsHlWbPZOy0QAlASfFHc74HjxfloouZjagXBqHnPfsBTBYhEUg\nrlfWQAYXwjBJ2fMEkUOU2vep9nVvIoFZ2a53cMyx21vDJRq52LgkNGWyWhNumN0j\nqcIo558JBPQDkZpGZFa50RoDE0vAnAzHmlXdYfoRKArd+2DULTtGZSq5AoGAETkz\n82OvHQLXRZO8rWzELblVxm/n0CP+4KntTlw07bLuxPo3WCq6fEivhFiEXfHavGex\nuceOsPcFTnTQ3DHVE5PLbbfIGh4Z5uhcmNbtpeEGQM2z8bungDhAIfP3wSA8mX3d\niRj98oNlYwKvUD6wyG71ntJxzC7AD3rO3RbL/ikCgYAdQQstIB8zzwXF5Cu1Pw7B\nNzEQvsV0ijgodiYD8g0PEgVzNSyj2leOeXpuQOmPCpjHi9e7xLTQjlHFu/qJuyls\nIzu2ROJQY6JIaPWXWLEuz/YkG3NgSvlTYvxQBn4yCus9wJYhpCCbly1vdmWLOdyt\n4VIyFGTnOzoVjPq3mYH9QQ==\n-----END PRIVATE KEY-----\n",
+  "client_email": "otonometer-storage@rising-dominion-403607.iam.gserviceaccount.com",
+  "client_id": "100311816908510975449",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/otonometer-storage%40rising-dominion-403607.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

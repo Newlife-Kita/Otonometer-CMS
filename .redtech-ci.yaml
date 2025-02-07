@@ -1,0 +1,130 @@
+variables:
+  IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+  CONTAINER_NAME_API: $CI_PROJECT_NAME-$CI_COMMIT_BRANCH
+
+  CI_DOCKER_LATEST_STAG: $CI_REGISTRY_IMAGE:dev
+  K8S_APP_NAME_STAG: otonometer-webcore-stag
+  K8S_SERVICE_PORT_STAG: 80
+  K8S_CONTAINER_PORT_STAG: 80
+  K8S_APP_DOMAIN_STAG: otonometer-webcore-stag.k8s.redtech.co.id
+  K8S_TLS_SECRET_STAG: otonometer-webcore-stag
+  IP_PRODUCTION: 34.128.101.127
+
+before_script:
+  - echo fs.inotify.max_user_watches=524288 | tee -a /etc/sysctl.conf && sysctl -p
+
+stages:
+  - push_tag
+  - staging
+  - build_image_stag
+  - prebuilt_stag
+  - deploy_stag
+
+Push tag:
+  stage: push_tag
+  image: docker:20.10.7-dind
+  variables:
+    USER: otonometer
+    PATH_SOURCE: /home/otonometer/web/otonometer-webcore
+  before_script:
+    - "which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )"
+    - eval $(ssh-agent -s)
+    - echo "$OTONOMETER_KEY" | tr -d '\r' | ssh-add - > /dev/null
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  script:
+    - ssh $USER@$IP_PRODUCTION "echo \"Update to version $CI_COMMIT_REF_NAME\""
+    - ssh $USER@$IP_PRODUCTION "cd $PATH_SOURCE && git checkout master && git branch -d latest || true && git pull && git fetch --tags && git checkout $CI_COMMIT_REF_NAME -b latest || true && git --no-pager log --oneline -n 10"
+    - ssh $USER@$IP_PRODUCTION "cd $PATH_SOURCE && cp -f .env.production .env"
+    - ssh $USER@$IP_PRODUCTION "cd $PATH_SOURCE && mkdir -p storage/{app/public,framework/{cache/data,sessions,testing,views},logs} || true && composer update && composer install"
+    - ssh $USER@$IP_PRODUCTION "cd $PATH_SOURCE && php artisan key:generate || true && php artisan optimize:clear || true && php artisan storage:link || true"
+    - ssh $USER@$IP_PRODUCTION "cd $PATH_SOURCE && composer dumpautoload"
+    - ssh $USER@$IP_PRODUCTION "cd $PATH_SOURCE && php artisan config:clear && php artisan cache:clear && php artisan optimize:clear && php artisan config:cache && php artisan optimize"
+    - ssh $USER@$IP_PRODUCTION "cd $PATH_SOURCE && sudo systemctl restart php8.2-fpm.service && sudo systemctl restart nginx.service"
+  only:
+    - tags
+
+Staging:
+  stage: staging
+  image: docker:20.10.7-dind
+  variables:
+    USER: otonometer
+    PATH_SOURCE: /home/otonometer/web/stag/otonometer-webcore
+  before_script:
+    - "which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )"
+    - eval $(ssh-agent -s)
+    - echo "$OTONOMETER_KEY" | tr -d '\r' | ssh-add - > /dev/null
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  script:
+    - ssh $USER@$IP_PRODUCTION "echo \"Update to version $CI_COMMIT_REF_NAME\""
+    - ssh $USER@$IP_PRODUCTION "cd $PATH_SOURCE && git fetch && git checkout staging && git pull origin staging"
+    - ssh $USER@$IP_PRODUCTION "cd $PATH_SOURCE && mkdir -p storage/{app/public,framework/{cache/data,sessions,testing,views},logs} || true && composer update && composer install"
+    - ssh $USER@$IP_PRODUCTION "cd $PATH_SOURCE && php artisan key:generate || true && php artisan optimize:clear || true && php artisan storage:link || true"
+    - ssh $USER@$IP_PRODUCTION "cd $PATH_SOURCE && composer dumpautoload"
+    - ssh $USER@$IP_PRODUCTION "cd $PATH_SOURCE && php artisan config:clear && php artisan cache:clear && php artisan optimize:clear && php artisan config:cache && php artisan optimize"
+    - ssh $USER@$IP_PRODUCTION "cd $PATH_SOURCE && sudo systemctl restart php8.2-fpm.service"
+  when: on_success
+  only:
+    - staging
+
+Build Image Staging:
+  stage: build_image_stag
+  image: docker:24.0.0-dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+  services:
+    - name: docker:24.0.0-dind
+      alias: docker
+      command: ["--tls=false"]
+  script:
+    - mv .env.staging .env
+    # for env set url
+    - sed -i "s/APP_URL=/APP_URL=https\:\/\/$K8S_APP_DOMAIN_STAG/" .env
+    - sed -i "s/ASSET_URL=/ASSET_URL=https\:\/\/$K8S_APP_DOMAIN_STAG/" .env
+    - cat .env
+
+    - mkdir -p storage/{app/public,framework/{cache/data,sessions,testing,views},logs}
+    - chmod -R 777 storage
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build --network host -f Dockerfile -t $CI_DOCKER_LATEST_STAG .
+    - docker push $CI_DOCKER_LATEST_STAG
+  when: on_success
+  only:
+    - development
+
+prebuilt stag:
+  stage: prebuilt_stag
+  image:
+    name: alpine:latest
+  script:
+    - apk add --no-cache gettext
+    - envsubst < kubernetes/deployment.stag.yaml > deployment.stag.yaml
+    - envsubst < kubernetes/pvc.stag.yaml > pvc.stag.yaml
+  artifacts:
+    paths:
+      - deployment.stag.yaml
+      - pvc.stag.yaml
+    expire_in: 1 day
+  when: on_success
+  only:
+    - development
+
+deploy kubernetes stag:
+  stage: deploy_stag
+  image:
+    name: bitnami/kubectl:1.22
+    entrypoint: [""]
+  allow_failure: true
+  script:
+    - export KUBECONFIG=kubernetes/k8s.config
+    - kubectl version --client
+    - kubectl delete -f deployment.stag.yaml || true
+    # - kubectl delete -f pvc.stag.yaml || true
+    - kubectl apply -f pvc.stag.yaml
+    - kubectl apply -f deployment.stag.yaml
+  when: on_success
+  only:
+    - development
