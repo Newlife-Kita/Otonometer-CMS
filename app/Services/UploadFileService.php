@@ -2,8 +2,11 @@
 
 namespace App\Services;
 
-use Illuminate\Http\Request;
 use File;
+use Aws\S3\S3Client;
+use Illuminate\Http\Request;
+use Aws\Exception\AwsException;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Google\Cloud\Storage\StorageClient as StorageClients;
 
@@ -18,32 +21,35 @@ class UploadFileService
      */
     public function uploadFile($path, $var_name, $request, $data = null, $set = null)
     {
-        if (@$request) {
-            // upload image
+        if ($request) {
+            // Upload file
             $file = $request;
             $fileName = uniqid() . '.' . str_replace(' ', '_', $file->getClientOriginalName());
-            // Storage::put($path . $fileName, File::get($file));
-            // $fileUploaded = $path . $fileName;
+            $s3FilePath = $path . $fileName;
 
-            // google cloud storage
-            $googleConfigFile = file_get_contents(config_path('googlecloud.json'));
-            $storage = new StorageClients([
-                'keyFile' => json_decode($googleConfigFile, true)
-            ]);
-            $storageBucketName = config('googlecloud.storage_bucket');
-            $bucket = $storage->bucket($storageBucketName);
-            $fileSource = fopen($file, 'r');
-            $newFolderName = $var_name . '_' . date("Y-m-d") . '_' . date("H:i:s");
-            $googleCloudStoragePath = $path . $fileName;
-            /* Upload a file to the bucket.
-            Using Predefined ACLs to manage object permissions, you may
-            upload a file and give read access to anyone with the URL.*/
-            $bucket->upload($fileSource, [
-                'predefinedAcl' => 'publicRead',
-                'name' => $googleCloudStoragePath
+            $s3 = new S3Client([
+                'region' => config('filesystems.disks.s3.region'),
+                'version' => 'latest',
+                'credentials' => [
+                    'key' => config('filesystems.disks.s3.key'),
+                    'secret' => config('filesystems.disks.s3.secret'),
+                ],
             ]);
 
-            $fileUploaded = $googleCloudStoragePath;
+            $bucket = config('filesystems.disks.s3.bucket');
+
+            try {
+                $s3->putObject([
+                    'Bucket' => $bucket,
+                    'Key' => $s3FilePath,
+                    'Body' => fopen($file->getPathname(), 'r'),
+                    'ContentType' => $file->getMimeType(),
+                ]);
+
+                $fileUploaded = $s3FilePath;
+            } catch (AwsException $e) {
+                Log::error('S3 Upload Error: ' . $e->getMessage());
+            }
         } else {
             if ($set == 'update') {
                 $fileUploaded = isset($data) ? @$data->$var_name : null;
@@ -54,4 +60,43 @@ class UploadFileService
 
         return $fileUploaded;
     }
+ # gcp
+    // public function uploadFile($path, $var_name, $request, $data = null, $set = null)
+    // {
+    //     if (@$request) {
+    //         // upload image
+    //         $file = $request;
+    //         $fileName = uniqid() . '.' . str_replace(' ', '_', $file->getClientOriginalName());
+    //         // Storage::put($path . $fileName, File::get($file));
+    //         // $fileUploaded = $path . $fileName;
+
+    //         // google cloud storage
+    //         $googleConfigFile = file_get_contents(config_path('googlecloud.json'));
+    //         $storage = new StorageClients([
+    //             'keyFile' => json_decode($googleConfigFile, true)
+    //         ]);
+    //         $storageBucketName = config('googlecloud.storage_bucket');
+    //         $bucket = $storage->bucket($storageBucketName);
+    //         $fileSource = fopen($file, 'r');
+    //         $newFolderName = $var_name . '_' . date("Y-m-d") . '_' . date("H:i:s");
+    //         $googleCloudStoragePath = $path . $fileName;
+    //         /* Upload a file to the bucket.
+    //         Using Predefined ACLs to manage object permissions, you may
+    //         upload a file and give read access to anyone with the URL.*/
+    //         $bucket->upload($fileSource, [
+    //             'predefinedAcl' => 'publicRead',
+    //             'name' => $googleCloudStoragePath
+    //         ]);
+
+    //         $fileUploaded = $googleCloudStoragePath;
+    //     } else {
+    //         if ($set == 'update') {
+    //             $fileUploaded = isset($data) ? @$data->$var_name : null;
+    //         } else {
+    //             $fileUploaded = null;
+    //         }
+    //     }
+
+    //     return $fileUploaded;
+    // }
 }

@@ -19,7 +19,7 @@ class AnggotaDprdDataTable extends DataTable
         $dataTable = new EloquentDataTable($query);
 
         return $dataTable->editColumn('foto', function($data) {
-            return '<img class="attachment-img" style="height: 50px;" src="'.env('APP_STORAGE').$data->foto.'">';
+            return '<img class="attachment-img" style="height: 50px;" src="'.env('AWS_STORAGE_URL').$data->foto.'">';
         })
         ->addColumn('action', 'anggota_dprds.datatables_actions')
         ->rawColumns(['foto','action']);

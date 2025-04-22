@@ -10,6 +10,7 @@
     "require": {
         "php": "^8.0",
         "ext-zip": "*",
+        "aws/aws-sdk-php": "^3.342",
         "barryvdh/laravel-dompdf": "^2.0.1",
         "doctrine/dbal": "^3.0",
         "google/cloud-storage": "^1.27",

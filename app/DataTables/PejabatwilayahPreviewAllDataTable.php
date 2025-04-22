@@ -21,7 +21,7 @@ class PejabatwilayahPreviewAllDataTable extends DataTable
         $dataTable = new EloquentDataTable($query);
 
         return $dataTable->editColumn('foto', function ($data) {
-            return '<img class="attachment-img" style="height: 50px;" src="' . env('APP_STORAGE', 'https://storage.googleapis.com/otonometer-bucket/') . $data->foto . '"></img>';
+            return '<img class="attachment-img" style="height: 50px;" src="' . env('AWS_STORAGE_URL') . $data->foto . '"></img>';
         })->addColumn('periode', function ($data) {
             return $data->tahun_lantik . ' - ' . ($data->tahun_akhir > date('Y') ? 'Sekarang' : $data->tahun_akhir);
         })

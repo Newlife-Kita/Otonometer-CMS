@@ -25,19 +25,19 @@
                                 {!! Form::label('tipe', 'Kabupaten/Kota:', ['class' => 'd-block']) !!}
                                 {!! Form::select('tipe', ['kabupaten' => 'kabupaten', 'kota' => 'kota'], null, ['class' => 'form-control select2']) !!}
                             </div>
-                            
+
                             <!-- Kode Field -->
                             <div class="form-group col-sm-4">
                                 {!! Form::label('kode', 'Kode:', ['class' => 'd-block']) !!}
-                    
-                                <div class="input-group mg-b-10">                                                       
+
+                                <div class="input-group mg-b-10">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">{{ $province->id_increament }}.</span>
                                     </div>
                                     {!! Form::number('id_increament', @$max_code, ['class' => 'form-control']) !!}
                                 </div>
                             </div>
-                    
+
                             @foreach ($lang as $lg)
                             <!-- Nama Field -->
                             <div class="form-group col-sm-10">
@@ -45,19 +45,19 @@
                                 {!! Form::text('nama[' . $lg->code . ']', $wilayah->getTranslation('nama', $lg->code) , ['class' => 'form-control']) !!}
                             </div>
                             @endforeach
-                    
+
                             <!-- Alamat Kantor Field -->
                             <div class="form-group col-sm-10 col-lg-10">
                                 {!! Form::label('alamat_kantor_pemerintahan', 'Alamat Kantor Pemerintahan:', ['class' => 'd-block']) !!}
                                 {!! Form::textarea('alamat_kantor_pemerintahan', null, ['class' => 'form-control', 'rows' => 2]) !!}
                             </div>
-                    
+
                             <!-- Alamat Kantor DPRD Field -->
                             <div class="form-group col-sm-10 col-lg-10">
                                 {!! Form::label('alamat_kantor_dprd', 'Alamat Kantor DPRD:', ['class' => 'd-block']) !!}
                                 {!! Form::textarea('alamat_kantor_dprd', null, ['class' => 'form-control', 'rows' => 2]) !!}
                             </div>
-                    
+
                             <!-- Lattitude Field -->
                             <div class="form-group col-sm-12">
                                 {!! Form::label('', 'Koordinat:', ['class' => 'd-block']) !!}
@@ -72,7 +72,7 @@
                                     {!! Form::text('longitude', null, ['class' => 'form-control', 'aria-describedby' => 'basic-addon2']) !!}
                                 </div>
                             </div>
-                    
+
                             <!-- Id Dataran Field -->
                             <div class="form-group col-sm-6">
                                 {!! Form::label('id_dataran', 'Kategori Dataran:') !!}
@@ -86,7 +86,7 @@
                                     {!! Form::checkbox('has_data', 1, @$wilayah->has_data == '1' ? true:false, ['class' => 'custom-control-input', 'id' => 'customCheck1']) !!}
                                     <label class="custom-control-label" for="customCheck1">Ada</label>
                                 </div>
-                            </div>   
+                            </div>
                         </div>
                         <div class="col-sm-4">
                             <!-- Logo Field -->
@@ -94,7 +94,7 @@
                                 {!! Form::label('peta_light_mode', 'Peta Light Mode:', ['class' => 'd-block']) !!}
                                 {!! Form::file('peta_light_mode', [
                                     'class' => 'form-control dropify',
-                                    'data-default-file' => @$wilayah->peta_light_mode ? env('APP_STORAGE').@$wilayah->peta_light_mode : '',
+                                    'data-default-file' => @$wilayah->peta_light_mode ? env('AWS_STORAGE_URL').@$wilayah->peta_light_mode : '',
                                     'data-max-file-size' => '2M'
                                 ]) !!}
                             </div>
@@ -103,17 +103,17 @@
                                 {!! Form::label('peta_dark_mode', 'Peta Dark Mode:', ['class' => 'd-block']) !!}
                                 {!! Form::file('peta_dark_mode', [
                                     'class' => 'form-control dropify',
-                                    'data-default-file' => @$wilayah->peta_dark_mode ? env('APP_STORAGE').@$wilayah->peta_dark_mode : '',
+                                    'data-default-file' => @$wilayah->peta_dark_mode ? env('AWS_STORAGE_URL').@$wilayah->peta_dark_mode : '',
                                     'data-max-file-size' => '2M',
                                 ]) !!}
                             </div>
                         </div>
                     </div>
-                    
-                    
+
+
                     <div class="clearfix"></div>
                     <hr>
-                    
+
                     <!-- Submit Field -->
                     <div class="form-group col-sm-12">
                         {!! Form::submit('Save', ['class' => 'btn btn-primary']) !!}

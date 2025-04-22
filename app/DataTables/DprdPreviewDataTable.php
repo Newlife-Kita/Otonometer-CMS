@@ -30,7 +30,7 @@ class DprdPreviewDataTable extends DataTable
         $dataTable = new EloquentDataTable($query);
 
         return $dataTable->editColumn('foto', function ($data) {
-            return '<img class="attachment-img" style="height: 50px;" src="' . env('APP_STORAGE').$data->foto . '">';
+            return '<img class="attachment-img" style="height: 50px;" src="' . env('AWS_STORAGE_URL').$data->foto . '">';
             })->editColumn('tahun_akhir', function ($data) {
                 return ($data->tahun_akhir > date('Y') ? 'Sekarang' : $data->tahun_akhir);
             })
