@@ -66,7 +66,7 @@
                                 {!! Form::label('id_dataran', 'Kategori Dataran:') !!}
                                 {!! Form::select('id_dataran', $dataran, null, ['class' => 'form-control select2']) !!}
                             </div>
-                            
+
                             <!-- Memiliki data nilai Field -->
                             <div class="form-group col-sm-6">
                                 {!! Form::label('has_data', 'Memiliki Data Nilai Bidang/Sektor:') !!}
@@ -74,7 +74,7 @@
                                     {!! Form::checkbox('has_data', 1, @$wilayah->has_data == '1' ? true:false, ['class' => 'custom-control-input', 'id' => 'customCheck1']) !!}
                                     <label class="custom-control-label" for="customCheck1">Ada</label>
                                 </div>
-                            </div>     
+                            </div>
                         </div>
                         <div class="col-sm-4">
                             <!-- Logo Field -->
@@ -82,7 +82,7 @@
                                 {!! Form::label('peta_light_mode', 'Peta Light Mode:', ['class' => 'd-block']) !!}
                                 {!! Form::file('peta_light_mode', [
                                     'class' => 'form-control dropify',
-                                    'data-default-file' => @$wilayah->peta_light_mode ? env('APP_STORAGE') . @$wilayah->peta_light_mode : '',
+                                    'data-default-file' => @$wilayah->peta_light_mode ? env('AWS_STORAGE_URL') . @$wilayah->peta_light_mode : '',
                                     'data-max-file-size' => '2M',
                                 ]) !!}
                             </div>
@@ -91,7 +91,7 @@
                                 {!! Form::label('peta_dark_mode', 'Peta Dark Mode:', ['class' => 'd-block']) !!}
                                 {!! Form::file('peta_dark_mode', [
                                     'class' => 'form-control dropify',
-                                    'data-default-file' => @$wilayah->peta_dark_mode ? env('APP_STORAGE') . @$wilayah->peta_dark_mode : '',
+                                    'data-default-file' => @$wilayah->peta_dark_mode ? env('AWS_STORAGE_URL') . @$wilayah->peta_dark_mode : '',
                                     'data-max-file-size' => '2M',
                                 ]) !!}
                             </div>

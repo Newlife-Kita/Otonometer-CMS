@@ -9,7 +9,7 @@
     {!! Form::label('file', 'File:', ['class' => 'd-block']) !!}
     {!! Form::file('file', [
         'class' => 'form-control dropify',
-        'data-default-file' => @$informasi->file ? env('APP_STORAGE') . @$informasi->file : '',
+        'data-default-file' => @$informasi->file ? env('AWS_STORAGE_URL') . @$informasi->file : '',
         'data-max-file-size' => '2M',
     ]) !!}
 </div>

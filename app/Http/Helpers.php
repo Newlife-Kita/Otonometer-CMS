@@ -1,13 +1,30 @@
 <?php
 
+use App\User;
+use Aws\S3\S3Client;
 use App\Models\Bidang;
 use App\Models\Wilayah;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Carbon;
-use Google\Cloud\Storage\StorageClient;
-use App\User;
-use Illuminate\Support\Facades\Response;
+use Aws\Exception\AwsException;
 use Illuminate\Support\Facades\Auth;
+use Google\Cloud\Storage\StorageClient;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Response;
+
+if (!function_exists('getS3Client')) {
+    function getS3Client()
+    {
+        return new S3Client([
+            'region' => config('filesystems.disks.s3.region'),
+            'version' => 'latest',
+            'credentials' => [
+                'key' => config('filesystems.disks.s3.key'),
+                'secret' => config('filesystems.disks.s3.secret'),
+            ],
+        ]);
+    }
+}
+
 
 if (!function_exists('saveImage')) {
     function saveImage($image, $storage, $isUpdate = false, $model = "")
@@ -172,57 +189,108 @@ if (!function_exists('getParentOfParentBidang')) {
     }
 }
 
-
 if (!function_exists("getFileUrl")) {
     function getFileUrl($filePath)
     {
-        $googleConfigFile = file_get_contents(config_path('googlecloud.json'));
-        $storage = new StorageClient([
-            'keyFile' => json_decode($googleConfigFile, true)
-        ]);
+        $s3 = getS3Client();
+        $bucket = config('filesystems.disks.s3.bucket');
 
-        $storageBucketName = config('googlecloud.storage_bucket');
-        $bucket = $storage->bucket($storageBucketName);
+        try {
+            $cmd = $s3->getCommand('GetObject', [
+                'Bucket' => $bucket,
+                'Key' => $filePath,
+            ]);
 
-        $object = $bucket->object($filePath);
-        # This URL is valid for 1 hour
-        $url = $object->signedUrl(new \DateTime('next hour'));
+            $request = $s3->createPresignedRequest($cmd, '+20 minutes');
 
-        return $url;
+            return (string)$request->getUri();
+        } catch (AwsException $e) {
+            return null;
+        }
     }
 }
 
-if (!function_exists("streamFile")) {
+# gcp
+// if (!function_exists("getFileUrl")) {
+//     function getFileUrl($filePath)
+//     {
+//         $googleConfigFile = file_get_contents(config_path('googlecloud.json'));
+//         $storage = new StorageClient([
+//             'keyFile' => json_decode($googleConfigFile, true)
+//         ]);
+
+//         $storageBucketName = config('googlecloud.storage_bucket');
+//         $bucket = $storage->bucket($storageBucketName);
+
+//         $object = $bucket->object($filePath);
+//         # This URL is valid for 1 hour
+//         $url = $object->signedUrl(new \DateTime('next hour'));
+
+//         return $url;
+//     }
+// }
+
+if (!function_exists('streamFile')) {
     function streamFile($filePath)
     {
-        $googleConfigFile = file_get_contents(config_path('googlecloud.json'));
-        $storage = new StorageClient([
-            'keyFile' => json_decode($googleConfigFile, true)
-        ]);
+        $s3 = getS3Client();
+        $bucket = config('filesystems.disks.s3.bucket');
 
-        $storageBucketName = config('googlecloud.storage_bucket');
-        $bucket = $storage->bucket($storageBucketName);
+        try {
+            $result = $s3->getObject([
+                'Bucket' => $bucket,
+                'Key' => $filePath,
+            ]);
 
-        $object = $bucket->object($filePath);
+            $headers = [
+                'Content-Type' => $result['ContentType'],
+                'Content-Disposition' => 'inline; filename="' . basename($filePath) . '"',
+            ];
 
-        if (!$object->exists()) {
+            return response()->stream(
+                function () use ($result) {
+                    echo $result['Body'];
+                },
+                200,
+                $headers
+            );
+        } catch (AwsException $e) {
             abort(404);
         }
-
-        // Stream the file to the user
-        $fileContents = $object->downloadAsStream();
-        $headers = [
-            'Content-Type' => $object->info()['contentType'],
-            'Content-Disposition' => 'inline; filename="' . $object->name() . '"',
-        ];
-
-        return Response::make(
-            $fileContents->getContents,
-            200,
-            $headers
-        );
     }
 }
+
+// if (!function_exists("streamFile")) {
+//     function streamFile($filePath)
+//     {
+//         $googleConfigFile = file_get_contents(config_path('googlecloud.json'));
+//         $storage = new StorageClient([
+//             'keyFile' => json_decode($googleConfigFile, true)
+//         ]);
+
+//         $storageBucketName = config('googlecloud.storage_bucket');
+//         $bucket = $storage->bucket($storageBucketName);
+
+//         $object = $bucket->object($filePath);
+
+//         if (!$object->exists()) {
+//             abort(404);
+//         }
+
+//         // Stream the file to the user
+//         $fileContents = $object->downloadAsStream();
+//         $headers = [
+//             'Content-Type' => $object->info()['contentType'],
+//             'Content-Disposition' => 'inline; filename="' . $object->name() . '"',
+//         ];
+
+//         return Response::make(
+//             $fileContents->getContents,
+//             200,
+//             $headers
+//         );
+//     }
+// }
 
 if (!function_exists("check_panel_access")) {
     function check_panel_access()
@@ -241,7 +309,7 @@ if (!function_exists("check_admin_access")) {
         }
 
         $wilayah = Wilayah::find(@Auth::user()->id_wilayah);
-        
+
         if(empty($wilayah)){
             abort(403, 'THIS PAGE IS UNAUTHORIZED.');
         }
@@ -252,7 +320,7 @@ if (!function_exists("wilayah_admin_access")) {
     function wilayah_admin_access()
     {
         $wilayah = Wilayah::find(@Auth::user()->id_wilayah);
-        
+
         if(empty($wilayah)){
             abort(403, 'THIS PAGE IS UNAUTHORIZED.');
         }

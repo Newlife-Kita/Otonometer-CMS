@@ -140,7 +140,7 @@
         {!! Form::label('foto', 'Foto:', ['class' => 'd-block']) !!}
         {!! Form::file('foto', [
             'class' => 'form-control dropify',
-            'data-default-file' => @$pejabatsudin->foto ? env('APP_STORAGE') . @$pejabatsudin->foto : '',
+            'data-default-file' => @$pejabatsudin->foto ? env('AWS_STORAGE_URL') . @$pejabatsudin->foto : '',
             'data-max-file-size' => '2M',
             'data-min-height' => '400',
             'data-max-height' => '400',
