@@ -19,7 +19,8 @@ class PartaiDataTable extends DataTable
         $dataTable = new EloquentDataTable($query);
 
         return $dataTable->editColumn('logo', function ($data) {
-            return '<img class="attachment-img" style="height: 50px;" src="' . getFileUrl($data->logo) . '"></img>';
+            $logoUrl = $data->logo ? getFileUrl($data->logo) : asset('default-logo.png');
+            return '<img class="attachment-img" style="height: 50px;" src="' .  $logoUrl . '"></img>';
         })
             ->addColumn('action', 'partais.datatables_actions')
             ->rawColumns(['logo', 'action']);
@@ -34,6 +35,7 @@ class PartaiDataTable extends DataTable
     public function query(Partai $model)
     {
         return $model->newQuery();
+
     }
 
     /**

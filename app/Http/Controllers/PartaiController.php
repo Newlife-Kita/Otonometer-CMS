@@ -50,6 +50,7 @@ class PartaiController extends AppBaseController
     public function index(PartaiDataTable $partaiDataTable)
     {
         $akses = Auth::user();
+
         if(!$akses->can('partai-show')){
             abort(403, 'THIS PAGE IS UNAUTHORIZED.');
         }
