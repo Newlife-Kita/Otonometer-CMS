@@ -31,7 +31,11 @@ class MemberaktifitasDataTable extends DataTable
      */
     public function query(Memberaktifitas $model)
     {
-        return $model->newQuery()->with('member')->with('halaman', 'halaman.wilayahSatu', 'halaman.wilayahDua');
+        return $model
+                ->newQuery()
+                ->whereHas('member')
+                ->with('member')
+                ->with('halaman', 'halaman.wilayahSatu', 'halaman.wilayahDua');
     }
 
     /**
