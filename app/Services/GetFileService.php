@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use Carbon\Carbon;
-use Aws\S3\S3Client;
+// use Aws\S3\S3Client;
 use Aws\Exception\AwsException;
 use Google\Cloud\Storage\StorageClient;
 
@@ -12,28 +12,12 @@ class GetFileService
 
     public function getFile($filePath)
     {
-        $s3 = new S3Client([
-            'region' => config('filesystems.disks.s3.region'),
-            'version' => 'latest',
-            'credentials' => [
-                'key' => config('filesystems.disks.s3.key'),
-                'secret' => config('filesystems.disks.s3.secret'),
-            ],
-        ]);
-
-        $bucket = config('filesystems.disks.s3.bucket');
-
         try {
-            $cmd = $s3->getCommand('GetObject', [
-                'Bucket' => $bucket,
-                'Key' => $filePath,
-            ]);
-
-            $request = $s3->createPresignedRequest($cmd, Carbon::now()->addHour());
-
-            return (string) $request->getUri();
-
-        } catch (AwsException $e) {
+            return Storage::disk('minio')->temporaryUrl(
+                $filePath,
+                Carbon::now()->addHour()
+            );
+        } catch (\Exception $e) {
             return null;
         }
     }
