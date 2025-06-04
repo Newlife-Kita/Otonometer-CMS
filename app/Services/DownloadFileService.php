@@ -1,7 +1,7 @@
 <?php
 namespace App\Services;
 
-use Aws\S3\S3Client;
+// use Aws\S3\S3Client;
 
 use Aws\Exception\AwsException;
 use Google\Cloud\Storage\StorageClient;
@@ -9,42 +9,31 @@ use Illuminate\Support\Facades\Response;
 
 class DownloadFileService
 {
-
     function downloadFile($filePath)
     {
-        $s3 = new S3Client([
-            'region' => config('filesystems.disks.s3.region'),
-            'version' => 'latest',
-            'credentials' => [
-                'key' => config('filesystems.disks.s3.key'),
-                'secret' => config('filesystems.disks.s3.secret'),
-            ],
-        ]);
-
-        $bucket = config('filesystems.disks.s3.bucket');
-
         try {
-            $result = $s3->getObject([
-                'Bucket' => $bucket,
-                'Key' => $filePath,
-            ]);
+            // Baca stream file dari MinIO
+            $stream = Storage::disk('minio')->readStream($filePath);
 
-            $headers = [
-                'Content-Type' => $result['ContentType'],
+            if (!$stream) {
+                abort(404);
+            }
+
+            // Deteksi MIME type file (opsional tapi disarankan)
+            $mimeType = Storage::disk('minio')->mimeType($filePath) ?? 'application/octet-stream';
+
+            // Response streaming sebagai download
+            return response()->stream(function () use ($stream) {
+                fpassthru($stream);
+                fclose($stream);
+            }, 200, [
+                'Content-Type' => $mimeType,
                 'Content-Disposition' => 'attachment; filename="' . basename($filePath) . '"',
-            ];
-
-            return response()->stream(
-                function () use ($result) {
-                    echo $result['Body'];
-                },
-                200,
-                $headers
-            );
-        } catch (AwsException $e) {
+            ]);
+        } catch (\Exception $e) {
             abort(404);
         }
-        }
+    }
 
 
     # gcp

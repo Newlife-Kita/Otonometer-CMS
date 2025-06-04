@@ -31,7 +31,7 @@ class MemberpaketDataTable extends DataTable
      */
     public function query(Memberpaket $model)
     {
-        return $model->newQuery()->with('member')->with('masterPaket');
+        return $model->newQuery()->whereHas('member')->with('member')->with('masterPaket');
     }
 
     /**
