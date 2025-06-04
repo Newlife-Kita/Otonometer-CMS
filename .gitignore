@@ -15,4 +15,5 @@ yarn-error.log
 yarn.lock
 composer.lock
 composer-setup.php
+package-lock.json
 public/adminer-mysql.php
