@@ -190,7 +190,16 @@ class UserController extends AppBaseController
         else {
             $user->roles()->detach();
         }
-        $user = $this->userRepository->update($request->all(), $id);
+
+        $input = $request->all();
+
+        if (empty($request->password)) {
+            $input['password'] = $user->password;
+        } else {
+            $input['password'] = Hash::make($request->password);
+        }
+
+        $user = $this->userRepository->update($input, $id);
         Flash::success('User updated successfully.');
         return redirect(route('users.index'));
     }
@@ -199,7 +208,7 @@ class UserController extends AppBaseController
 
         $input = $request->except('checkAll');
         $user = $this->userRepository->findWithoutFail(@$input['id']);
-        
+
         if($request->permissions <> ''){
             $user->syncPermissions($request->permissions);
         }else{
