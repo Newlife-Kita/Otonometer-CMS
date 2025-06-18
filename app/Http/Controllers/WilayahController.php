@@ -341,7 +341,7 @@ class WilayahController extends AppBaseController
         }
 
         $datarans = Dataran::all();
-        $lang = $this->bahasaRepopsitory->all();    
+        $lang = $this->bahasaRepopsitory->all();
         if ($datarans->count() > 0) $dataran = $datarans->pluck('nama', 'id');
         else $dataran = ['' => 'Pilih Dataran'];
 
@@ -392,19 +392,23 @@ class WilayahController extends AppBaseController
             return redirect()->back()->withInput($input)->withErrors($cek . ' Kode sudah di gunakan, silakan gunakan kode lain');
         }
 
-        if (@$request->peta_light_mode) {
-            // $input['peta_light_mode'] = $this->saveFile->setImage(@$request->peta_light_mode)->setStorage('pemda')->handle();
+        if ($request->hasFile('peta_light_mode')) {
             $input['peta_light_mode'] = $this->uploadFile->uploadFile($this->path, 'daerah', @$request->peta_light_mode, $wilayah, 'update');
+        } elseif ($wilayah->peta_light_mode && $request->get('peta_light_mode') === null) {
+            $input['peta_light_mode'] = null;
         } else {
             $input['peta_light_mode'] = @$wilayah->peta_light_mode;
         }
 
-        if (@$request->peta_dark_mode) {
-            // $input['peta_dark_mode'] = $this->saveFile->setImage(@$request->peta_dark_mode)->setStorage('pemda')->handle();
+        if ($request->hasFile('peta_dark_mode')) {
             $input['peta_dark_mode'] = $this->uploadFile->uploadFile($this->path, 'daerah', @$request->peta_dark_mode, $wilayah, 'update');
+        } elseif ($wilayah->peta_dark_mode && $request->get('peta_dark_mode') === null) {
+            $input['peta_dark_mode'] = null;
         } else {
             $input['peta_dark_mode'] = @$wilayah->peta_dark_mode;
         }
+
+        // dd($request);
 
         $input['has_data'] = @$request->has_data ? @$request->has_data : 0;
 
