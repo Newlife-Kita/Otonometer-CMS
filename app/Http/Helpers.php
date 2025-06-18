@@ -193,6 +193,10 @@ if (!function_exists("getFileUrl")) {
     function getFileUrl($filePath)
     {
         try {
+            if (empty($filePath)) {
+                return null;
+            }
+
             return Storage::disk('minio')->temporaryUrl(
                 $filePath,
                 now()->addMinutes(60)
