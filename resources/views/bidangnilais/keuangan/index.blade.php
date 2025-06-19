@@ -537,7 +537,9 @@
                 showCancelButton: true,
                 preConfirm: (value) => {
                     // Format input value as money
+                    console.log(value);
                     let formattedValue = parseFloat(value.replace(/,/g, '.'));
+                    console.log(formattedValue);
 
                     // Format with Indonesian Rupiah
                     if (isNaN(formattedValue)) {
@@ -576,7 +578,7 @@
                         } else {
                             // Handle invalid result
                             Swal.fire({
-                                text: 'Gagal menambahkan nilai baru.',
+                                text: result.message || 'Gagal menambahkan nilai baru.',
                                 icon: 'error',
                             });
                         }
