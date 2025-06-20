@@ -579,7 +579,7 @@
                         } else {
                             // Handle invalid result
                             Swal.fire({
-                                text: 'Gagal menambahkan nilai baru.',
+                                text: result.message || 'Gagal menambahkan nilai baru.',
                                 icon: 'error',
                             });
                         }

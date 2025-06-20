@@ -121,6 +121,8 @@ class BidangnilaiController extends AppBaseController
         $wilayah = $request->wilayah;
         $nilai = $request->nilai;
 
+        // dd($request->all());
+
         if (empty($tahun)) {
             return response()->json(['valid' => false, 'items' => '', 'message' => 'Tahun data belum dipilih']);
         }
@@ -128,8 +130,12 @@ class BidangnilaiController extends AppBaseController
             return response()->json(['valid' => false, 'items' => '', 'message' => 'Sektor/Bidang belum dipilih']);
         }
 
-        if (empty($nilai)) {
+        if (empty($nilai) && $nilai != 0) {
             return response()->json(['valid' => false, 'items' => '', 'message' => 'Nilai sektor belum ditentukan']);
+        }
+
+        if (!is_numeric($nilai)) {
+            return response()->json(['valid' => false, 'items' => '', 'message' => 'Nilai sektor harus berupa angka']);
         }
 
 
@@ -554,7 +560,7 @@ class BidangnilaiController extends AppBaseController
         $select = Bidangkeuangan::selectRaw("nomenklatur_amount_keuangan.id_bidang, nomenklatur_amount_keuangan.id_wilayah, nomenklatur_amount_keuangan.nilai, nomenklatur_amount_keuangan.created_at, $tahun as tahun")
             ->distinct()
             ->get();
-       
+
         //menghitung jumlah data yang berbedaa
         $changed = (int) Bidangkeuangan::join("$tablename as na", function ($join) {
             $join->on('nomenklatur_amount_keuangan.id_bidang', '=', 'na.id_bidang')
