@@ -33,7 +33,7 @@ class UserDataTable extends DataTable
         $role = Role::whereName('admin wilayah')->first();
         return $model->newQuery()
         ->leftJoin('model_has_roles','model_has_roles.model_id','=','users.id')
-        ->where('model_has_roles.role_id', '!=', @$role->id)
+        // ->where('model_has_roles.role_id', '!=', @$role->id)
         ->selectRaw('users.id, users.email,users.name');
     }
 

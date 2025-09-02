@@ -12,7 +12,7 @@
             <div style="margin-right: -15px;margin-left: -15px;">
                 <div data-label="Edit" class="df-example demo-forms services-forms">
                     {!! Form::model($user, ['route' => ['users.update', $user->id], 'method' => 'patch']) !!}
-                        @include('users.fields')
+                        @include('users.fields_update')
                     {!! Form::close() !!}
                 </div>
             </div>

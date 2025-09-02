@@ -17,6 +17,7 @@ use Spatie\Permission\Models\Role;
 use Illuminate\Http\Request; // added by dandisy
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth; // added by dandisy
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage; // added by dandisy
 use Maatwebsite\Excel\Facades\Excel; // added by dandisy
 
@@ -80,6 +81,8 @@ class UserController extends AppBaseController
     public function store(CreateUserRequest $request)
     {
         $input = $request->all();
+
+        $input['password'] = Hash::make($request->password);
 
         $user = $this->userRepository->create($input);
 
@@ -199,7 +202,7 @@ class UserController extends AppBaseController
 
         $input = $request->except('checkAll');
         $user = $this->userRepository->findWithoutFail(@$input['id']);
-        
+
         if($request->permissions <> ''){
             $user->syncPermissions($request->permissions);
         }else{
