@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use File;
-use Aws\S3\S3Client;
+// use Aws\S3\S3Client;
 use Illuminate\Http\Request;
 use Aws\Exception\AwsException;
 use Illuminate\Support\Facades\Log;
@@ -22,35 +22,29 @@ class UploadFileService
     public function uploadFile($path, $var_name, $request, $data = null, $set = null)
     {
         if ($request) {
-            // Upload file
+            // Persiapan file
             $file = $request;
             $fileName = uniqid() . '.' . str_replace(' ', '_', $file->getClientOriginalName());
-            $s3FilePath = $path . $fileName;
-
-            $s3 = new S3Client([
-                'region' => config('filesystems.disks.s3.region'),
-                'version' => 'latest',
-                'credentials' => [
-                    'key' => config('filesystems.disks.s3.key'),
-                    'secret' => config('filesystems.disks.s3.secret'),
-                ],
-            ]);
-
-            $bucket = config('filesystems.disks.s3.bucket');
+            $fullPath = $path . $fileName;
 
             try {
-                $s3->putObject([
-                    'Bucket' => $bucket,
-                    'Key' => $s3FilePath,
-                    'Body' => fopen($file->getPathname(), 'r'),
-                    'ContentType' => $file->getMimeType(),
-                ]);
+                // Upload ke MinIO
+                Storage::disk('minio')->put(
+                    $fullPath,
+                    file_get_contents($file->getRealPath()),
+                    [
+                        'visibility' => 'private',
+                        'ContentType' => $file->getMimeType(),
+                    ]
+                );
 
-                $fileUploaded = $s3FilePath;
-            } catch (AwsException $e) {
-                Log::error('S3 Upload Error: ' . $e->getMessage());
+                $fileUploaded = $fullPath;
+            } catch (\Exception $e) {
+                Log::error('MinIO Upload Error: ' . $e->getMessage());
+                $fileUploaded = null;
             }
         } else {
+            // Mode update (jika tidak ada file baru)
             if ($set == 'update') {
                 $fileUploaded = isset($data) ? @$data->$var_name : null;
             } else {

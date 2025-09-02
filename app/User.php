@@ -66,10 +66,6 @@ class User extends Authenticatable
     {
         return $this->getConnection()->getSchemaBuilder()->getColumnListing($this->getTable());
     }
-    public function setPasswordAttribute($password)
-    {
-        $this->attributes['password'] = bcrypt($password);
-    }
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
@@ -78,7 +74,7 @@ class User extends Authenticatable
     {
         return $this->hasOne(Wilayah::class, 'id', 'id_wilayah')->select('nama');
     }
-    
+
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasOne

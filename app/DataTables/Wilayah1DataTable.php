@@ -18,14 +18,21 @@ class Wilayah1DataTable extends DataTable
     public function dataTable($query)
     {
         $dataTable = new EloquentDataTable($query);
+        //         return $dataTable->editColumn('peta_light_mode', function ($data) {
+        //     return '<img class="attachment-img" style="height: 50px;" src="' . getFileUrl(@$data->peta_light_mode) . '"></img>';
+        // })->editColumn('peta_dark_mode', function ($data) {
+        //     return '<img class="attachment-img" style="height: 50px;" src="' . getFileUrl(@$data->peta_dark_mode) . '"></img>';
         return $dataTable->editColumn('peta_light_mode', function ($data) {
-            return '<img class="attachment-img" style="height: 50px;" src="' . getFileUrl(@$data->peta_light_mode) . '"></img>';
+            return '<img class="attachment-img" style="height: 50px;" src="' .
+            (getFileUrl(@$data->peta_light_mode) ?: 'https://placehold.co/400?text=Image+Not+Found&font=roboto') .
+            '"/>';
         })->editColumn('peta_dark_mode', function ($data) {
-            return '<img class="attachment-img" style="height: 50px;" src="' . getFileUrl(@$data->peta_dark_mode) . '"></img>';
+            return '<img class="attachment-img" style="height: 50px;" src="' .
+            (getFileUrl(@$data->peta_dark_mode) ?: 'https://placehold.co/400?text=Image+Not+Found&font=roboto') .
+            '"></img>';
         })->editColumn('nama', function ($data) {
             return $data->getTranslation('nama', app()->getLocale());
-        })
-            ->addColumn('action', 'wilayahs.datatables_child_actions')
+        })->addColumn('action', 'wilayahs.datatables_child_actions')
             ->rawColumns(['peta_light_mode', 'action', 'peta_dark_mode']);
     }
 

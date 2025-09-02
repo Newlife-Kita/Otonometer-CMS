@@ -1,7 +1,7 @@
 <?php
 
 use App\User;
-use Aws\S3\S3Client;
+// use Aws\S3\S3Client;
 use App\Models\Bidang;
 use App\Models\Wilayah;
 use Illuminate\Support\Carbon;
@@ -11,19 +11,19 @@ use Google\Cloud\Storage\StorageClient;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Response;
 
-if (!function_exists('getS3Client')) {
-    function getS3Client()
-    {
-        return new S3Client([
-            'region' => config('filesystems.disks.s3.region'),
-            'version' => 'latest',
-            'credentials' => [
-                'key' => config('filesystems.disks.s3.key'),
-                'secret' => config('filesystems.disks.s3.secret'),
-            ],
-        ]);
-    }
-}
+// if (!function_exists('getS3Client')) {
+//     function getS3Client()
+//     {
+//         return new S3Client([
+//             'region' => config('filesystems.disks.s3.region'),
+//             'version' => 'latest',
+//             'credentials' => [
+//                 'key' => config('filesystems.disks.s3.key'),
+//                 'secret' => config('filesystems.disks.s3.secret'),
+//             ],
+//         ]);
+//     }
+// }
 
 
 if (!function_exists('saveImage')) {
@@ -192,19 +192,16 @@ if (!function_exists('getParentOfParentBidang')) {
 if (!function_exists("getFileUrl")) {
     function getFileUrl($filePath)
     {
-        $s3 = getS3Client();
-        $bucket = config('filesystems.disks.s3.bucket');
-
         try {
-            $cmd = $s3->getCommand('GetObject', [
-                'Bucket' => $bucket,
-                'Key' => $filePath,
-            ]);
+            if (empty($filePath)) {
+                return null;
+            }
 
-            $request = $s3->createPresignedRequest($cmd, '+20 minutes');
-
-            return (string)$request->getUri();
-        } catch (AwsException $e) {
+            return Storage::disk('minio')->temporaryUrl(
+                $filePath,
+                now()->addMinutes(60)
+            );
+        } catch (\Exception $e) {
             return null;
         }
     }
@@ -233,28 +230,23 @@ if (!function_exists("getFileUrl")) {
 if (!function_exists('streamFile')) {
     function streamFile($filePath)
     {
-        $s3 = getS3Client();
-        $bucket = config('filesystems.disks.s3.bucket');
-
         try {
-            $result = $s3->getObject([
-                'Bucket' => $bucket,
-                'Key' => $filePath,
-            ]);
+            $stream = Storage::disk('minio')->readStream($filePath);
 
-            $headers = [
-                'Content-Type' => $result['ContentType'],
+            if (!$stream) {
+                abort(404);
+            }
+
+            $mimeType = Storage::disk('minio')->mimeType($filePath);
+
+            return response()->stream(function () use ($stream) {
+                fpassthru($stream);
+                fclose($stream);
+            }, 200, [
+                'Content-Type' => $mimeType ?? 'application/octet-stream',
                 'Content-Disposition' => 'inline; filename="' . basename($filePath) . '"',
-            ];
-
-            return response()->stream(
-                function () use ($result) {
-                    echo $result['Body'];
-                },
-                200,
-                $headers
-            );
-        } catch (AwsException $e) {
+            ]);
+        } catch (\Exception $e) {
             abort(404);
         }
     }

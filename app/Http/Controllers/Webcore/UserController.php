@@ -193,7 +193,16 @@ class UserController extends AppBaseController
         else {
             $user->roles()->detach();
         }
-        $user = $this->userRepository->update($request->all(), $id);
+
+        $input = $request->all();
+
+        if (empty($request->password)) {
+            $input['password'] = $user->password;
+        } else {
+            $input['password'] = Hash::make($request->password);
+        }
+
+        $user = $this->userRepository->update($input, $id);
         Flash::success('User updated successfully.');
         return redirect(route('users.index'));
     }
