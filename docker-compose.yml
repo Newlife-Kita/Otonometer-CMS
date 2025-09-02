@@ -6,7 +6,7 @@ services:
     build:
       context: .
       dockerfile: docker/php/Dockerfile
-    container_name: sso_app
+    container_name: otonometer_cms_app
     restart: unless-stopped
     working_dir: /var/www
     mem_limit: 2g # Set memory limit to 2GB
@@ -20,7 +20,7 @@ services:
   # Nginx Web Server Service
   nginx:
     image: nginx:alpine
-    container_name: sso_nginx
+    container_name: otonometer_cms_nginx
     restart: unless-stopped
     ports:
       - "8001:80"
