@@ -1,50 +1,61 @@
-# For more information: https://laravel.com/docs/sail
-version: '3'
+version: '3.8'
+
 services:
-    laravel.test:
-        build:
-            context: ./vendor/laravel/sail/runtimes/8.0
-            dockerfile: Dockerfile
-            args:
-                WWWGROUP: '${WWWGROUP}'
-        image: sail-8.0/app
-        extra_hosts:
-            - 'host.docker.internal:host-gateway'
-        ports:
-            - '${APP_PORT:-80}:80'
-        environment:
-            WWWUSER: '${WWWUSER}'
-            LARAVEL_SAIL: 1
-            XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
-            XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
-        volumes:
-            - '.:/var/www/html'
-        networks:
-            - sail
-        depends_on:
-            - mysql
-    mysql:
-        image: 'mysql/mysql-server:8.0'
-        ports:
-            - '${FORWARD_DB_PORT:-3306}:3306'
-        environment:
-            MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
-            MYSQL_ROOT_HOST: "%"
-            MYSQL_DATABASE: '${DB_DATABASE}'
-            MYSQL_USER: '${DB_USERNAME}'
-            MYSQL_PASSWORD: '${DB_PASSWORD}'
-            MYSQL_ALLOW_EMPTY_PASSWORD: 1
-        volumes:
-            - 'sailmysql:/var/lib/mysql'
-        networks:
-            - sail
-        healthcheck:
-            test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}"]
-            retries: 3
-            timeout: 5s
+  # PHP/Laravel Application Service
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: otonometer_cms_app
+    restart: unless-stopped
+    working_dir: /var/www
+    mem_limit: 2g # Set memory limit to 2GB
+    volumes:
+      - ./:/var/www
+      - ./docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini # Custom PHP config
+      - ./docker/php/www.conf:/usr/local/etc/php-fpm.d/www.conf   # Custom FPM config
+    networks:
+      - laravel
+
+  # Nginx Web Server Service
+  nginx:
+    image: nginx:alpine
+    container_name: otonometer_cms_nginx
+    restart: unless-stopped
+    ports:
+      - "8001:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - laravel
+    depends_on:
+      - app
+
+# Laravel Queue Worker
+#   queue:
+#     build:
+#       context: .
+#       dockerfile: docker/php/Dockerfile
+#     container_name: otonometer_cms_queue
+#     restart: unless-stopped
+#     working_dir: /var/www
+#     command: php artisan queue:work --queue=high,default --sleep=3 --tries=3 --timeout=90
+#     volumes:
+#       - ./:/var/www
+#       - ./docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini
+#       - ./docker/php/www.conf:/usr/local/etc/php-fpm.d/www.conf
+#     depends_on:
+#       - app
+#     networks:
+#       - laravel
+
+# Docker Networks
 networks:
-    sail:
-        driver: bridge
+  laravel:
+    driver: bridge
+
+# Named Volume for Database Persistence
 volumes:
-    sailmysql:
-        driver: local
+  db_data:
+    driver: local
