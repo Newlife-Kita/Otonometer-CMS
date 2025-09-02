@@ -14,6 +14,8 @@ services:
       - ./:/var/www
       - ./docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini # Custom PHP config
       - ./docker/php/www.conf:/usr/local/etc/php-fpm.d/www.conf   # Custom FPM config
+    ports:
+      - "9001:9000"   # <--- tambahkan ini
     networks:
       - laravel
 
