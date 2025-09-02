@@ -29,7 +29,7 @@ class UploadFileService
 
             try {
                 // Upload ke MinIO
-                Storage::disk('minio')->put(
+                Storage::disk('s3')->put(
                     $fullPath,
                     file_get_contents($file->getRealPath()),
                     [

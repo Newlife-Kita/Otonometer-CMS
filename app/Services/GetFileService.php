@@ -13,7 +13,7 @@ class GetFileService
     public function getFile($filePath)
     {
         try {
-            return Storage::disk('minio')->temporaryUrl(
+            return Storage::disk('s3')->temporaryUrl(
                 $filePath,
                 Carbon::now()->addHour()
             );

@@ -13,14 +13,14 @@ class DownloadFileService
     {
         try {
             // Baca stream file dari MinIO
-            $stream = Storage::disk('minio')->readStream($filePath);
+            $stream = Storage::disk('s3')->readStream($filePath);
 
             if (!$stream) {
                 abort(404);
             }
 
             // Deteksi MIME type file (opsional tapi disarankan)
-            $mimeType = Storage::disk('minio')->mimeType($filePath) ?? 'application/octet-stream';
+            $mimeType = Storage::disk('s3')->mimeType($filePath) ?? 'application/octet-stream';
 
             // Response streaming sebagai download
             return response()->stream(function () use ($stream) {

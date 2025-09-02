@@ -197,7 +197,7 @@ if (!function_exists("getFileUrl")) {
                 return null;
             }
 
-            return Storage::disk('minio')->temporaryUrl(
+            return Storage::disk('s3')->temporaryUrl(
                 $filePath,
                 now()->addMinutes(60)
             );
@@ -231,13 +231,13 @@ if (!function_exists('streamFile')) {
     function streamFile($filePath)
     {
         try {
-            $stream = Storage::disk('minio')->readStream($filePath);
+            $stream = Storage::disk('s3')->readStream($filePath);
 
             if (!$stream) {
                 abort(404);
             }
 
-            $mimeType = Storage::disk('minio')->mimeType($filePath);
+            $mimeType = Storage::disk('s3')->mimeType($filePath);
 
             return response()->stream(function () use ($stream) {
                 fpassthru($stream);
