@@ -44,5 +44,5 @@ RUN mkdir -p storage/framework/{sessions,views,cache}
 # Set correct permissions for the web server user
 RUN chown -R www-data:www-data storage bootstrap/cache
 
-EXPOSE 9001
+EXPOSE 9000
 CMD ["php-fpm"]

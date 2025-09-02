@@ -14,8 +14,6 @@ services:
       - ./:/var/www
       - ./docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini # Custom PHP config
       - ./docker/php/www.conf:/usr/local/etc/php-fpm.d/www.conf   # Custom FPM config
-    ports:
-      - "9001:9000"   # <--- tambahkan ini
     networks:
       - laravel
 
@@ -33,6 +31,24 @@ services:
       - laravel
     depends_on:
       - app
+
+# Laravel Queue Worker
+#   queue:
+#     build:
+#       context: .
+#       dockerfile: docker/php/Dockerfile
+#     container_name: otonometer_cms_queue
+#     restart: unless-stopped
+#     working_dir: /var/www
+#     command: php artisan queue:work --queue=high,default --sleep=3 --tries=3 --timeout=90
+#     volumes:
+#       - ./:/var/www
+#       - ./docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini
+#       - ./docker/php/www.conf:/usr/local/etc/php-fpm.d/www.conf
+#     depends_on:
+#       - app
+#     networks:
+#       - laravel
 
 # Docker Networks
 networks:
