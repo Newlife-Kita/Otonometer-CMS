@@ -451,6 +451,9 @@ class BidangnilaiController extends AppBaseController
                 // mengambil data dari database
                 $arrayDb = Bidangkeuangan::select('id_bidang', 'id_wilayah', DB::raw('ROUND(nilai, 3) AS nilai'))->get()->toArray();
 
+                Log::info('Data dari database:', $arrayDb);
+                Log::info('Data dari excel:', $arrayExcel);
+
                 // mengencode data
                 $md5Excel = md5(json_encode($arrayExcel));
                 $md5DB = md5(json_encode($arrayDb));
