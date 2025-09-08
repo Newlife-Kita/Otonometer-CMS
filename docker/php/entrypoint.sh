@@ -5,6 +5,7 @@ set -e
 mkdir -p /var/www/storage/framework/{sessions,views,cache}
 mkdir -p /var/www/storage/logs
 chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+chmod -R 775 /var/www/storage /var/www/bootstrap/cache /var/www/storage/logs
 
 # Install composer dependencies (only if vendor/ is missing or outdated)
 if [ ! -d "/var/www/vendor" ]; then

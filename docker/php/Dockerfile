@@ -1,9 +1,5 @@
-# Stage 1: Get the Composer binary
 FROM composer:2 as composer_stage
 
-# ---
-
-# Stage 2: Build the final application image
 FROM php:8.2-fpm-alpine
 
 WORKDIR /var/www
@@ -11,38 +7,24 @@ WORKDIR /var/www
 # Install system dependencies
 RUN apk update && apk add --no-cache \
     libzip-dev \
-    zip \
-    unzip \
-    libpng-dev \
-    libjpeg-turbo-dev \
-    freetype-dev \
-    git
+    zip unzip \
+    libpng-dev libjpeg-turbo-dev freetype-dev \
+    git bash
 
-# Install core PHP extensions for Laravel
+# Install PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) gd \
-    && docker-php-ext-install pdo_mysql zip bcmath exif
+    && docker-php-ext-install -j$(nproc) gd pdo_mysql zip bcmath exif
 
-# Copy Composer binary from the first stage
+# Copy Composer
 COPY --from=composer_stage /usr/bin/composer /usr/bin/composer
 
-# Copy only composer files to leverage Docker's cache
-COPY composer.json composer.lock ./
+# Copy entrypoint script
+COPY docker/php/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
-# Install dependencies without autoloader optimization
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader
-
-# Copy the rest of the application source code
+# Copy app source
 COPY . .
 
-# Generate the optimized autoloader now that all files are present
-RUN composer dump-autoload --optimize --no-dev --classmap-authoritative
-
-# Create the storage directory structure if it doesn't exist
-RUN mkdir -p storage/framework/{sessions,views,cache}
-
-# Set correct permissions for the web server user
-RUN chown -R www-data:www-data storage bootstrap/cache
-
 EXPOSE 9000
+ENTRYPOINT ["entrypoint.sh"]
 CMD ["php-fpm"]
