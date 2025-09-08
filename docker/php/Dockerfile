@@ -30,7 +30,7 @@ COPY --from=composer_stage /usr/bin/composer /usr/bin/composer
 COPY composer.json composer.lock ./
 
 # Install dependencies without autoloader optimization
-RUN composer install --no-interaction --no-dev --no-scripts --no-autoloader
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
 # Copy the rest of the application source code
 COPY . .
