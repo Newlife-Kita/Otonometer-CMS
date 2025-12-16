@@ -42,6 +42,7 @@ use Illuminate\Support\Facades\Session;
 use Laracasts\Flash\Flash as FlashFlash;
 use PhpParser\Node\Stmt\TryCatch;
 use ReflectionClass;
+use Spatie\DbDumper\Databases\MySql;
 
 class BidangnilaiController extends AppBaseController
 {
@@ -511,6 +512,29 @@ class BidangnilaiController extends AppBaseController
         // cek apa table sudah pernah ada? jika belum buat tabel dengan schema dibawah
         $tablename = 'nomenklatur_amount_' . @$tahun;
         if (Schema::hasTable($tablename)) {
+            MySql::create()
+                ->setDbName(env('DB_DATABASE'))
+                ->setUserName(env('DB_USERNAME'))
+                ->setPassword(env('DB_PASSWORD'))
+                ->setHost(env('DB_HOST'))
+                ->includeTables($tablename)
+                ->dumpToFile(storage_path('backup_' . $tablename . '_' . date('Y_m_d_H_i_s') . '.sql'));
+
+            Schema::drop($tablename);
+
+            Schema::create($tablename, function ($table) use ($tahun) {
+                $table->increments('id');
+                $table->integer('id_bidang')->nullable();
+                $table->integer('id_nomenklatur')->nullable();
+                $table->integer('id_wilayah')->nullable();
+                $table->year('tahun')->default($tahun);
+                $table->decimal('nilai', 12, 3)->nullable();
+                $table->integer('created_by')->nullable();
+                $table->integer('updated_by')->nullable();
+                $table->longText('history_updated')->nullable();
+                $table->timestamps();
+                $table->softDeletes();
+            });
         } else {
             Schema::create($tablename, function ($table) use ($tahun) {
                 $table->increments('id');
@@ -1105,6 +1129,29 @@ class BidangnilaiController extends AppBaseController
         // cek apa table sudah pernah ada?
         $tablename = 'nomenklatur_amount_' . @$tahun;
         if (Schema::hasTable($tablename)) {
+            MySql::create()
+                ->setDbName(env('DB_DATABASE'))
+                ->setUserName(env('DB_USERNAME'))
+                ->setPassword(env('DB_PASSWORD'))
+                ->setHost(env('DB_HOST'))
+                ->includeTables($tablename)
+                ->dumpToFile(storage_path('backup_' . $tablename . '_' . date('Y_m_d_H_i_s') . '.sql'));
+
+            Schema::drop($tablename);
+
+            Schema::create($tablename, function ($table) use ($tahun) {
+                $table->increments('id');
+                $table->integer('id_bidang')->nullable();
+                $table->integer('id_nomenklatur')->nullable();
+                $table->integer('id_wilayah')->nullable();
+                $table->year('tahun')->default($tahun);
+                $table->decimal('nilai', 12, 3)->nullable();
+                $table->integer('created_by')->nullable();
+                $table->integer('updated_by')->nullable();
+                $table->longText('history_updated')->nullable();
+                $table->timestamps();
+                $table->softDeletes();
+            });
         } else {
             Schema::create($tablename, function ($table) use ($tahun) {
                 $table->increments('id');
@@ -1584,6 +1631,29 @@ class BidangnilaiController extends AppBaseController
         // cek apa table sudah pernah ada?
         $tablename = 'nomenklatur_amount_' . @$tahun;
         if (Schema::hasTable($tablename)) {
+            MySql::create()
+                ->setDbName(env('DB_DATABASE'))
+                ->setUserName(env('DB_USERNAME'))
+                ->setPassword(env('DB_PASSWORD'))
+                ->setHost(env('DB_HOST'))
+                ->includeTables($tablename)
+                ->dumpToFile(storage_path('backup_' . $tablename . '_' . date('Y_m_d_H_i_s') . '.sql'));
+
+            Schema::drop($tablename);
+
+            Schema::create($tablename, function ($table) use ($tahun) {
+                $table->increments('id');
+                $table->integer('id_bidang')->nullable();
+                $table->integer('id_nomenklatur')->nullable();
+                $table->integer('id_wilayah')->nullable();
+                $table->year('tahun')->default($tahun);
+                $table->decimal('nilai', 12, 3)->nullable();
+                $table->integer('created_by')->nullable();
+                $table->integer('updated_by')->nullable();
+                $table->longText('history_updated')->nullable();
+                $table->timestamps();
+                $table->softDeletes();
+            });
         } else {
             Schema::create($tablename, function ($table) use ($tahun) {
                 $table->increments('id');

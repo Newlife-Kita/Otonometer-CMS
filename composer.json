@@ -30,6 +30,7 @@
         "nevadskiy/laravel-tree": "^0.4.0",
         "orangehill/iseed": "^3.0",
         "prettus/l5-repository": "~2.6",
+        "spatie/db-dumper": "^3.8",
         "spatie/laravel-permission": "^5.8",
         "spatie/laravel-translatable": "^6.5",
         "unisharp/laravel-filemanager": "^2.6",
